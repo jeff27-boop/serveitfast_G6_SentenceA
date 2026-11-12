@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<title>Serve It Fast!</title>
+<style>
+:root{
+  --red:#e94b35;--orange:#ff9f1c;--cream:#fff8e9;--ink:#273044;
+  --green:#27b765;--blue:#39a8d8;--gold:#ffd34e;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#fff0d7;color:var(--ink);
+  font-family:"Comic Neue","Comic Sans MS","Comic Sans",cursive;overflow-x:hidden}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.screen{display:none;min-height:100vh;padding:clamp(12px,2vw,24px);text-align:center;position:relative}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.brand{font-size:clamp(34px,5vw,58px);font-weight:900;letter-spacing:1px;color:var(--red);
+  text-shadow:3px 3px 0 white,5px 5px 0 #f7bd65;margin:2px 0 12px}
+.brand .zap{color:var(--orange);display:inline-block;transform:skew(-12deg)}
+.panel{width:min(900px,98%);background:#fffdf7;border:5px solid #efb85c;border-radius:28px;
+  box-shadow:0 8px 0 #d98b3e,0 15px 30px #7b4b2420;padding:clamp(16px,3vw,30px);margin:8px auto}
+.question{font-size:clamp(25px,3.5vw,38px);color:#a9432e;margin:0 0 14px}
+.small-label{font-size:18px;font-weight:bold;color:#79543c;margin:8px 0}
+.students{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:16px 0}
+.student{min-width:190px;padding:16px 24px;border:4px solid #b8dff0;border-radius:20px;
+  background:#e9f8ff;font-size:25px;font-weight:bold;color:#24536c;box-shadow:0 5px 0 #b8dff0}
+.student.selected{background:#fff0b9;border-color:var(--orange);box-shadow:0 5px 0 #e8a13b;transform:translateY(-3px)}
+.role-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:16px 0}
+.role{min-width:200px;border-radius:17px;padding:12px 20px;background:#fff0e2;border:2px dashed #e7a45a;font-size:21px;font-weight:bold}
+.role.waiter{background:#e9f7ff;border-color:#68b9dd}
+.role strong{display:block;font-size:25px}
+.scoreboard{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:8px 0 14px}
+.score{background:#fff;border:3px solid #f1c36a;border-radius:15px;padding:7px 18px;font-size:19px;font-weight:bold}.top-scores{width:100%;justify-content:space-between;padding:0 4px;margin:0 0 8px}.top-scores .score{min-width:105px}
+.score b{font-size:25px;color:var(--red);margin-left:8px}
+.btn{border:0;border-radius:18px;padding:13px 34px;font-size:25px;font-weight:900;color:white;
+  background:var(--green);box-shadow:0 6px 0 #16834a;transition:.12s}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #16834a}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.orange{background:var(--orange);box-shadow:0 6px 0 #c47713}
+.menu-board{width:min(1000px,98%);background:#fffaf0;border:9px double #b96c36;border-radius:18px;
+  padding:15px 18px 20px;box-shadow:0 8px 0 #8f4c2a}
+.menu-heading{font-size:clamp(27px,4vw,40px);color:#a9432e;font-weight:900;
+  border-bottom:3px dashed #d7a16b;padding-bottom:8px;margin:0 0 12px}
+.menu-sub{font-size:19px;color:#805638;margin:0 0 10px}
+.food-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.food-card{background:#fff;border:3px solid #ead6b7;border-radius:15px;padding:8px 5px 9px;
+  min-height:132px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 3px 0 #e5c59c;transition:.12s}
+.food-card.selected{border-color:var(--green);background:#e9ffed;box-shadow:0 3px 0 #7fc995;transform:scale(1.035)}
+.food-card img{width:88px;height:76px;object-fit:contain}
+.food-card span{font-size:19px;font-weight:bold;color:#543b2d;text-transform:capitalize}
+.selection-line{font-size:19px;font-weight:bold;color:#3e738b;margin:10px}
+.sentence{font-size:clamp(18px,2.4vw,24px);font-weight:bold;color:#8b482c;background:#fff0c8;
+  border-radius:13px;padding:10px;margin:10px auto;max-width:850px}
+#gameScreen{padding:0;overflow:hidden;min-height:100vh;height:100vh;background:
+  radial-gradient(circle at 50% 40%,#fff9db 0,#ffe6b7 65%,#ffd18d 100%)}
+.game-top{z-index:10;position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:12px;background:#ffffffdf;border:3px solid white;
+  border-radius:30px;padding:4px 15px;box-shadow:0 3px 12px #78451b30;font-size:17px;font-weight:bold;white-space:nowrap}
+#timer{font-size:24px;color:var(--red);font-weight:900;min-width:28px}
+#gameField{position:absolute;inset:0;overflow:hidden;touch-action:manipulation;z-index:4}
+.fly-food{position:absolute;z-index:4;width:clamp(76px,10vw,112px);height:clamp(76px,10vw,112px);
+  padding:2px;object-fit:contain;background:#ffffffec;border:3px solid white;border-radius:20px;
+  box-shadow:0 5px 12px #603b2730;cursor:pointer;user-select:none;-webkit-user-drag:none}
+.fly-food:active{transform:scale(.88)}
+.fly-food.wrong{border-color:#ef3434;box-shadow:0 0 0 5px #ff343455,0 5px 12px #603b2730;animation:wrongShake .22s ease}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.wrong-note{position:absolute;z-index:8;top:58px;left:50%;transform:translateX(-50%);background:#e53935;color:white;border:2px solid white;border-radius:12px;padding:5px 14px;font-size:17px;font-weight:bold;pointer-events:none;animation:noteOut .65s forwards}
+@keyframes noteOut{0%{opacity:0;transform:translate(-50%,-8px)}15%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.flash{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;
+  background:radial-gradient(circle, #ffffffb0 0%,#fff4 35%,transparent 70%)}
+.flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+.game-title{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;
+  font-size:clamp(22px,3vw,34px);font-weight:900;color:#a9432e;
+  background:#ffffffd9;border:3px solid white;border-radius:18px;padding:5px 18px;white-space:nowrap}
+.result-title{font-size:clamp(32px,5vw,52px);font-weight:900;color:var(--red);margin:5px}
+.result-detail{font-size:21px;font-weight:bold;line-height:1.5}
+.stars{font-size:46px;animation:sparkle .6s infinite alternate}
+@keyframes sparkle{to{transform:scale(1.16) rotate(4deg)}}
+.victory-overlay{display:none;position:fixed;inset:0;z-index:100;background:#1d253ddd;
+ align-items:center;justify-content:center;padding:18px;overflow:hidden}
+.victory-overlay.show{display:flex}
+.victory-card{position:relative;z-index:2;background:#fffaf0;border:7px solid #ffd34e;
+ border-radius:28px;padding:30px 22px;max-width:540px;width:100%;
+ box-shadow:0 10px 0 #d98b3e;text-align:center;animation:popIn .45s cubic-bezier(.2,1.5,.5,1)}
+.victory-heading{font-size:clamp(27px,5vw,43px);font-weight:900;color:#e94b35;line-height:1.15;margin:12px 0}
+.victory-winner{font-size:clamp(28px,4vw,38px);font-weight:900;color:#238b56;margin:12px}
+.victory-emoji{font-size:clamp(35px,6vw,55px)}
+@keyframes popIn{from{transform:scale(.45);opacity:0}to{transform:scale(1);opacity:1}}
+.confetti-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;top:-20px;width:11px;height:18px;opacity:.95;
+ animation:confettiFall var(--fall,2.5s) linear forwards;transform:rotate(var(--rot,0deg))}
+@keyframes confettiFall{to{transform:translate3d(var(--drift,0px),110vh,0) rotate(900deg);opacity:.9}}
+@media(max-width:600px){
+ .screen{padding:12px}.panel{padding:15px}.student{min-width:145px;padding:13px}
+ .food-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .food-card{min-height:116px}.food-card img{width:78px;height:68px}
+ .menu-board{padding:12px}.role{min-width:145px}
+ .game-title{bottom:8px}.game-top{top:7px}
+}
+</style>
+</head>
+<body>
+
+<section id="roleScreen" class="screen active">
+  <div class="scoreboard top-scores" id="roleScore"></div>
+  <h1 class="brand">🍽️ SERVE IT <span class="zap">FAST!</span> ⚡</h1>
+  <div class="panel">
+    <h2 class="question">What would you like to eat?</h2>
+    <div class="students">
+      <button class="student selected" id="student1" onclick="chooseCustomer(1)">👦 Student 1</button>
+      <button class="student" id="student2" onclick="chooseCustomer(2)">👧 Student 2</button>
+    </div>
+    <div class="role-row">
+      <div class="role">🍽️ CUSTOMER<strong id="customerName">Student 1</strong></div>
+      <div class="role waiter">👨‍🍳 WAITER<strong id="waiterName">Student 2</strong></div>
+    </div>
+    <button class="btn" onclick="startRound()">START</button>
+  </div>
+</section>
+
+<section id="menuScreen" class="screen">
+  <div class="scoreboard top-scores" id="menuScore"></div>
+  <h1 class="brand">🍴 MENU</h1>
+  <div class="menu-board">
+    <p class="menu-sub" id="customerTitle">Student 1 · CUSTOMER</p>
+    <div class="sentence" id="sentence">I'd like some ___, ___, and ___, please.</div>
+    <div class="selection-line" id="selectionCount">Choose 3 foods · 0/3</div>
+    <div class="food-grid" id="foodGrid"></div>
+    <button class="btn orange" id="goButton" onclick="startChallenge()" disabled>GO! ⚡</button>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+  <div class="game-top">⏱️ <span id="timer">10</span> SEC</div>
+  <div id="gameField"></div>
+  <div class="flash" id="flash"></div>
+  <div class="game-title">⚡ CATCH THE 3 FOODS! ⚡</div>
+</section>
+
+<section id="resultScreen" class="screen">
+  <div class="scoreboard top-scores" id="resultScore"></div>
+  <div class="panel">
+    <div id="resultMessage" class="result-title"></div>
+    <div id="resultStars" class="stars"></div>
+    <button class="btn" onclick="backToRoles()">NEXT ROUND</button>
+  </div>
+</section>
+
+<div id="victoryPopup" class="victory-overlay" aria-hidden="true">
+  <div id="confetti" class="confetti-layer"></div>
+  <div class="victory-card">
+    <div class="victory-emoji">🎉 🏆 🎉</div>
+    <div class="victory-heading">CONGRATULATIONS!</div>
+    <div class="victory-winner" id="victoryWinner">S1 WINS!</div>
+    <div class="victory-emoji">🎊 ✨ 🎊</div>
+    <button class="btn" onclick="resetGame()">TRY AGAIN</button>
+  </div>
+</div>
+
+<audio id="selectSound" src="https://commondatastorage.googleapis.com/codeskulptor-demos/pyman_assets/eatpellet.ogg" preload="auto"></audio>
+<audio id="catchSound" src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/alien_shoot.wav" preload="auto"></audio>
+
+<script>
+const foods=[
+ {name:"Soup",url:"https://i.postimg.cc/g20vPTs0/vzcx.png"},
+ {name:"Dumplings",url:"https://i.postimg.cc/tCkhwj3p/sbfs.png"},
+ {name:"Pizza",url:"https://i.postimg.cc/m2jQJsYb/vsdfzbv.png"},
+ {name:"Rice",url:"https://i.postimg.cc/m2jQJsQn/bvx.png"},
+ {name:"Steak",url:"https://i.postimg.cc/c40RFHnZ/dvxb.png"},
+ {name:"Noodles",url:"https://i.postimg.cc/Dy6qHTqR/bzdxfgb.png"},
+ {name:"Sandwiches",url:"https://i.postimg.cc/8P4h9SRp/dsbvb.png"},
+ {name:"French fries",url:"https://i.postimg.cc/qM4s1R3r/bsgdfbvx.png"}
+];
+let customer=1,scores={1:0,2:0},selectedFoods=[],caughtFoods=new Set(),sprites=[];
+let gameRunning=false,roundFinished=false,startTime=0,animationFrame,timerInterval,lastFrame=0,timePenaltySeconds=0;
+const $=id=>document.getElementById(id);
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active")}
+function sound(id){const a=$(id);a.currentTime=0;a.play().catch(()=>{})}
+function chooseCustomer(n){customer=n;$("student1").classList.toggle("selected",n===1);$("student2").classList.toggle("selected",n===2);$("customerName").textContent="Student "+n;$("waiterName").textContent="Student "+(3-n)}
+function scoreHTML(){return `<div class="score">S1 <b>${scores[1]}</b></div><div class="score">S2 <b>${scores[2]}</b></div>`}
+function updateScores(){["roleScore","menuScore","resultScore"].forEach(id=>$(id).innerHTML=scoreHTML())}
+function startRound(){selectedFoods=[];caughtFoods.clear();updateScores();showScreen("menuScreen");$("customerTitle").textContent="Student "+customer+" · CUSTOMER";renderMenu()}
+function renderMenu(){const grid=$("foodGrid");grid.innerHTML="";foods.forEach(food=>{const card=document.createElement("button");card.className="food-card";card.innerHTML=`<img src="${food.url}" alt="${food.name}"><span>${food.name.toLowerCase()}</span>`;card.onclick=()=>toggleFood(food,card);grid.appendChild(card)});updateSelection()}
+function toggleFood(food,card){const i=selectedFoods.findIndex(f=>f.name===food.name);if(i>=0){selectedFoods.splice(i,1);card.classList.remove("selected")}else{if(selectedFoods.length===3)return;selectedFoods.push(food);card.classList.add("selected");sound("selectSound")}updateSelection()}
+function updateSelection(){$("selectionCount").textContent=`Choose 3 foods · ${selectedFoods.length}/3`;$("sentence").textContent=selectedFoods.length===3?`I'd like some ${selectedFoods[0].name.toLowerCase()}, ${selectedFoods[1].name.toLowerCase()}, and ${selectedFoods[2].name.toLowerCase()}, please.`:"I'd like some ___, ___, and ___, please.";$("goButton").disabled=selectedFoods.length!==3}
+
+function startChallenge(){
+ if(selectedFoods.length!==3)return;
+ showScreen("gameScreen");const field=$("gameField");field.innerHTML="";sprites=[];caughtFoods.clear();roundFinished=false;gameRunning=true;
+ const w=field.clientWidth,h=field.clientHeight;
+ const size=window.innerWidth<=600?72:96;
+ // All requested foods are guaranteed to appear, with extra distractors.
+ const distractors=foods.filter(food=>!selectedFoods.some(target=>target.name===food.name));
+ const pool=[...selectedFoods,...Array.from({length:9},()=>distractors[Math.floor(Math.random()*distractors.length)])];
+ pool.sort(()=>Math.random()-.5);
+ const cols=4, rows=Math.ceil(pool.length/cols);
+ pool.forEach((food,index)=>{
+   const img=document.createElement("img");img.className="fly-food";img.src=food.url;img.alt=food.name;img.draggable=false;
+   img.style.zIndex=String(5+index);
+   // Start foods in separate screen zones to prevent overlapping tap targets.
+   const col=index%cols, row=Math.floor(index/cols);
+   const cellW=w/cols, cellH=h/rows;
+   const x=Math.max(0,Math.min(w-size,col*cellW+(cellW-size)/2+(Math.random()-.5)*18));
+   const y=Math.max(0,Math.min(h-size,row*cellH+(cellH-size)/2+(Math.random()-.5)*18));
+   // Slow, steady movement in varied directions; foods wrap around the screen.
+   const angle=[0,Math.PI,Math.PI/2,-Math.PI/2,Math.PI/4,-Math.PI/4,3*Math.PI/4,-3*Math.PI/4][Math.floor(Math.random()*8)];
+   const speed=Math.min(w,h)*(0.27+Math.random()*.08);
+   const s={element:img,food:food.name,x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,size,caught:false};
+   img.addEventListener("pointerdown",(event)=>{event.preventDefault();event.stopPropagation();catchFood(s)},{passive:false});
+   field.appendChild(img);sprites.push(s);
+ });
+ $("timer").textContent="10";$("flash").classList.remove("go");void $("flash").offsetWidth;$("flash").classList.add("go");
+ startTime=performance.now();lastFrame=0;timePenaltySeconds=0;cancelAnimationFrame(animationFrame);clearInterval(timerInterval);
+ timerInterval=setInterval(()=>{if(!gameRunning)return;const left=Math.max(0,10-Math.floor((performance.now()-startTime)/1000)-timePenaltySeconds);$("timer").textContent=left;if(left===0)finishRound(false)},80);
+ animationFrame=requestAnimationFrame(animate);
+}
+function animate(now){
+ if(!gameRunning)return;
+ const field=$("gameField"),w=field.clientWidth,h=field.clientHeight;
+ const dt=Math.min(.045,(now-(lastFrame||now))/1000);lastFrame=now;
+ sprites.forEach(s=>{
+   if(s.caught)return;
+   s.x+=s.vx*dt;s.y+=s.vy*dt;
+   // Wrap at every edge so motion never stops.
+   if(s.x>w)s.x=-s.size;if(s.x< -s.size)s.x=w;
+   if(s.y>h)s.y=-s.size;if(s.y< -s.size)s.y=h;
+   s.element.style.left=s.x+"px";s.element.style.top=s.y+"px";
+ });
+ animationFrame=requestAnimationFrame(animate);
+}
+function catchFood(s){
+ if(!gameRunning||s.caught)return;
+ sound("catchSound");
+ if(selectedFoods.some(f=>f.name===s.food)&&!caughtFoods.has(s.food)){
+   caughtFoods.add(s.food);s.caught=true;s.element.style.display="none";
+   if(caughtFoods.size===3)finishRound(true);
+ }else{
+   s.element.classList.remove("wrong");void s.element.offsetWidth;s.element.classList.add("wrong");
+   timePenaltySeconds++;
+   const elapsed=Math.floor((performance.now()-startTime)/1000);
+   const remaining=Math.max(0,10-elapsed-timePenaltySeconds);
+   $("timer").textContent=remaining;
+   const note=document.createElement("div");note.className="wrong-note";
+   note.textContent="✖ WRONG! −1 SEC";
+   $("gameScreen").appendChild(note);
+   setTimeout(()=>note.remove(),700);
+   setTimeout(()=>s.element.classList.remove("wrong"),300);
+   if(remaining<=0)finishRound(false);
+ }
+}
+function finishRound(waiterWon){
+ if(roundFinished)return;
+ roundFinished=true;
+ gameRunning=false;
+ clearInterval(timerInterval);
+ cancelAnimationFrame(animationFrame);
+
+ const waiter=3-customer;
+ // Only the Waiter can earn a point, and only for catching all 3 foods.
+ if(waiterWon) scores[waiter]++;
+
+ showScreen("resultScreen");
+ updateScores();
+
+ if(waiterWon){
+   $("resultMessage").textContent="GOOD JOB!";
+   $("resultMessage").style.color="#20a85a";
+   $("resultStars").textContent="🌟 ⭐ 🌟";
+ }else{
+   $("resultMessage").textContent="TOO SLOW!";
+   $("resultMessage").style.color="#e65b48";
+   $("resultStars").textContent="⏰";
+ }
+
+ if(waiterWon && scores[waiter]>=5){
+   $("victoryWinner").textContent="S"+waiter+" WINS!";
+   showVictory();
+ }
+}
+
+function showVictory(){
+ const popup=$("victoryPopup");
+ popup.classList.add("show");
+ popup.setAttribute("aria-hidden","false");
+ launchConfetti();
+ playVictorySound();
+}
+
+function launchConfetti(){
+ const layer=$("confetti");
+ layer.innerHTML="";
+ const colors=["#ff4d6d","#ffd34e","#27b765","#39a8d8","#a66cff","#ff9f1c"];
+ for(let i=0;i<120;i++){
+   const piece=document.createElement("i");
+   piece.className="confetti-piece";
+   piece.style.left=(Math.random()*100)+"%";
+   piece.style.background=colors[i%colors.length];
+   piece.style.setProperty("--fall",(2+Math.random()*2.2)+"s");
+   piece.style.setProperty("--drift",((Math.random()-.5)*260)+"px");
+   piece.style.setProperty("--rot",(Math.random()*360)+"deg");
+   piece.style.animationDelay=(Math.random()*.8)+"s";
+   layer.appendChild(piece);
+ }
+}
+
+function playVictorySound(){
+ // Short celebratory fanfare made with Web Audio; no external sound file needed.
+ try{
+   const AudioCtx=window.AudioContext||window.webkitAudioContext;
+   if(!AudioCtx)return;
+   const ctx=new AudioCtx();
+   const notes=[523.25,659.25,783.99,1046.5];
+   notes.forEach((freq,i)=>{
+     const osc=ctx.createOscillator();
+     const gain=ctx.createGain();
+     osc.type="triangle";
+     osc.frequency.value=freq;
+     gain.gain.setValueAtTime(0.0001,ctx.currentTime+i*.16);
+     gain.gain.exponentialRampToValueAtTime(.16,ctx.currentTime+i*.16+.03);
+     gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+i*.16+.32);
+     osc.connect(gain);gain.connect(ctx.destination);
+     osc.start(ctx.currentTime+i*.16);
+     osc.stop(ctx.currentTime+i*.16+.34);
+   });
+   setTimeout(()=>ctx.close(),1300);
+ }catch(e){}
+}
+function backToRoles(){cancelAnimationFrame(animationFrame);clearInterval(timerInterval);gameRunning=false;chooseCustomer(customer===1?2:1);updateScores();showScreen("roleScreen")}
+function resetGame(){
+ clearInterval(timerInterval);cancelAnimationFrame(animationFrame);
+ gameRunning=false;roundFinished=false;scores={1:0,2:0};
+ selectedFoods=[];caughtFoods.clear();sprites=[];timePenaltySeconds=0;
+ $("victoryPopup").classList.remove("show");
+ $("victoryPopup").setAttribute("aria-hidden","true");
+ $("confetti").innerHTML="";
+ chooseCustomer(1);updateScores();showScreen("roleScreen");
+}
+updateScores();
+</script>
+</body>
+</html>
